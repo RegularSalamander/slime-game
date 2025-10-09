@@ -116,16 +116,33 @@ end
 --returns true if any point in a is inside the polygon of b
 function pointInPoly(a, b)
     for i = 1, #a.points, 2 do
-        local rayIntersects = 0
-        local line = {a.points[i], a.points[i+1], 100000, a.points[i+1]}
+        local windingNumber = 0
+        local x, y = a.points[i], a.points[i+1]
+        
         for j = 1, #b.points, 2 do
-            local x, y, int = lineTest(line,
-                {b.points[wrap(j, #b.points)], b.points[wrap(j+1, #b.points)], b.points[wrap(j+2, #b.points)], b.points[wrap(j+3, #b.points)]}
-            )
-            if int then rayIntersects = rayIntersects + 1 end
+            local xi = b.points[wrap(j, #b.points)]
+            local yi = b.points[wrap(j+1, #b.points)]
+            local xj = b.points[wrap(j+2, #b.points)]
+            local yj = b.points[wrap(j+3, #b.points)]
+
+            if yj <= y then
+                if yi > y then
+                    if isLeft(xj, yj, xi, yi, x, y) > 0 then
+                        windingNumber = windingNumber + 1
+                    end
+                end
+            else
+                if yi <= y then
+                    if isLeft(xj, yj, xi, yi, x, y) < 0 then
+                        windingNumber = windingNumber - 1
+                    end
+                end
+            end
         end
-        if rayIntersects % 2 == 1 then return true end
+
+        if windingNumber ~= 0 then return true end
     end
+
     return false
 end
 
@@ -205,4 +222,8 @@ end
 
 function wrap(x, a)
     return (x - 1) % a + 1
+end
+
+function isLeft(x1, y1, x2, y2, x3, y3)
+    return (x2 - x1) * (y3 - y1) - (x3 -  x1) * (y2 - y1)
 end
