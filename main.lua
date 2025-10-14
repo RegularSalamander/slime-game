@@ -3,6 +3,10 @@ require "colliders"
 
 require "variables"
 
+require "game"
+
+gameState = ""
+
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.graphics.setLineStyle("rough")
@@ -12,43 +16,47 @@ function love.load()
     
     gameCanvas = love.graphics.newCanvas(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-    a = polycollider:new({10, 0, 40, 0, 50, 10, 50, 40, 40, 50, 10, 50, 0, 40, 0, 10})
-    b = linecollider:new(30, 10, 40, 50)
-    c = pointcollider:new(100, 100)
-    d = rectcollider:new(10, 60, 30, 30)
     love.graphics.setBackgroundColor(0, 0, 0)
+
+    setGameState("game")
 end
 
 function love.update()
-    local w, h = love.graphics.getDimensions()
-    local scl = math.min(w/SCREEN_WIDTH, h/SCREEN_HEIGHT)
-    local Xoff = 0
-    local Yoff = 0
-    if w > h then Xoff = (w - h) / 2 end
-    if h > w then Yoff = (h - w) / 2 end
-
-    a:move((love.mouse.getX() - Xoff) / scl, (love.mouse.getY() - Yoff) / scl)
+    if not love.window.hasFocus() then return end
+    
+    if _G[gameState .. "_update"] then
+        _G[gameState .. "_update"](dt)
+    end
 end
 
 function love.draw()
-    love.graphics.setCanvas(gameCanvas)
-
-    love.graphics.clear()
-
-    if intersect(a, b) or intersect(a, c) or intersect(a, d) then
-        love.graphics.setColor(1, 1/2, 1/2, 1)
-    else
-        love.graphics.setColor(1, 1, 1, 1)
+    if _G[gameState .. "_draw"] then
+        _G[gameState .. "_draw"]()
     end
-    a:draw()
-    b:draw()
-    c:draw()
-    d:draw()
-    love.graphics.print(b.type, 0, 0)
 
     love.graphics.setCanvas()
     local w, h = love.graphics.getDimensions()
     local scl = math.min(w/SCREEN_WIDTH, h/SCREEN_HEIGHT)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(gameCanvas, w/2, h/2, 0, scl, scl, SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+end
+
+function love.keypressed(key, scancode, isrepeat)
+    if _G[gameState .. "_keypressed"] then
+		_G[gameState .. "_keypressed"](key, scancode, isrepeat)
+	end
+end
+
+function love.keyreleased(key, scancode, isrepeat)
+    if _G[gameState .. "_keyreleased"] then
+		_G[gameState .. "_keyreleased"](key, scancode, isrepeat)
+	end
+end
+
+function setGameState(newGameState)
+    gameState = newGameState
+
+    if _G[gameState .. "_load"] then
+		_G[gameState .. "_load"]()
+	end
 end
