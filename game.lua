@@ -6,6 +6,8 @@ function game_load()
         down = 0,
         z = 0
     }
+
+    gameMap = map:new()
 end
 
 function game_update()
@@ -22,6 +24,8 @@ function game_draw()
     love.graphics.clear()
 
     love.graphics.print(controls.z, 10, 10)
+
+    gameMap:draw()
 end
 
 function game_keypressed(key, scancode, isrepeat)

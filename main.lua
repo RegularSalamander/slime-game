@@ -3,6 +3,7 @@ require "colliders"
 
 require "variables"
 
+require "map"
 require "game"
 
 gameState = ""
