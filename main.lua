@@ -2,8 +2,10 @@ require "class"
 require "colliders"
 
 require "variables"
+require "util"
 
 require "map"
+require "player"
 require "game"
 
 gameState = ""

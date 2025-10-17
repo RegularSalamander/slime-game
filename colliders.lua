@@ -19,9 +19,15 @@ end
 
 function collider:draw()
     for i = 1, #self.points - 2, 2 do
-        love.graphics.line(self.points[i], self.points[i+1], self.points[i+2], self.points[i+3])
+        love.graphics.line(
+            math.floor(self.points[i]), math.floor(self.points[i+1]),
+            math.floor(self.points[i+2]), math.floor(self.points[i+3])
+        )
     end
-    love.graphics.line(self.points[#self.points-1], self.points[#self.points], self.points[1], self.points[2])
+    love.graphics.line(
+        math.floor(self.points[#self.points-1]), math.floor(self.points[#self.points]),
+        math.floor(self.points[1]), math.floor(self.points[2])
+    )
 end
 
 pointcollider = collider:new()
@@ -30,7 +36,7 @@ function pointcollider:init(x, y)
     self.points = {x, y}
 end
 function pointcollider:draw()
-    love.graphics.circle("fill", self.points[1], self.points[2], 3)
+    love.graphics.circle("fill", math.floor(self.points[1]), math.floor(self.points[2]), 3)
 end
 
 linecollider = collider:new()

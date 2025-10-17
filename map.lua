@@ -30,6 +30,18 @@ function map:init()
     self.currentScreen = 1
 end
 
+function map:wallCollide(other)
+    local screen = self.screens[self.currentScreen]
+    
+    for i = 1, #screen.walls do
+        if intersect(screen.walls[i].collider, other) then
+            return true
+        end
+    end
+
+    return false
+end
+
 function map:draw()
     local screen = self.screens[self.currentScreen]
     

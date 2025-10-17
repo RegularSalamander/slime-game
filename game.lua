@@ -8,9 +8,12 @@ function game_load()
     }
 
     gameMap = map:new()
+    gamePlayer = player:new()
 end
 
 function game_update()
+    gamePlayer:update()
+
     --update controls
     for k, v in pairs(controls) do
         if v > 0 then controls[k] = v + 1
@@ -23,9 +26,11 @@ function game_draw()
     love.graphics.setCanvas(gameCanvas)
     love.graphics.clear()
 
-    love.graphics.print(controls.z, 10, 10)
+    love.graphics.print(gameMap:wallCollide(gamePlayer.collider) and "true" or "false", 10, 10)
 
     gameMap:draw()
+
+    gamePlayer:draw()
 end
 
 function game_keypressed(key, scancode, isrepeat)
