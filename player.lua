@@ -7,7 +7,11 @@ function player:init()
     self.onground = false
     self.onwall = false
 
+    self.coyoteGround = 0
+    self.coyoteWall = 0
+
     self.dir = 1
+    self.lastWallDir = 1
 
     self.collider = rectcollider:new(self.pos.x, self.pos.y, PLAYER_WIDTH, PLAYER_HEIGHT)
     self.wallTester = pointcollider:new(self.pos.x - 1, self.pos.y + PLAYER_HEIGHT/2)
@@ -15,9 +19,19 @@ function player:init()
 end
 
 function player:update()
+    --collision state tests and coyote time
     self.onground = gameMap:wallCollide(self.groundTester)
     self.onwall = gameMap:wallCollide(self.wallTester)
 
+    self.coyoteGround = self.coyoteGround + 1
+    self.coyoteWall = self.coyoteWall + 1
+    if self.onground then self.coyoteGround = 0 end
+    if self.onwall then
+        self.coyoteWall = 0
+        self.lastWallDir = self.dir
+    end
+
+    --controls
     local leftRightMove = 0
     if controls.right > 0 then leftRightMove = leftRightMove + 1 end
     if controls.left > 0 then leftRightMove = leftRightMove - 1 end
@@ -26,23 +40,35 @@ function player:update()
     if controls.down > 0 then upDownMove = upDownMove + 1 end
     if controls.up > 0 then upDownMove = upDownMove - 1 end
 
-    if leftRightMove > 0 then
-        self.vel.x = approach(self.vel.x, PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
-    elseif leftRightMove < 0 then
-        self.vel.x = approach(self.vel.x, -PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
+    --left and right movement/deceleration
+    if self.onground then
+        if leftRightMove > 0 then
+            self.vel.x = approach(self.vel.x, PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
+        elseif leftRightMove < 0 then
+            self.vel.x = approach(self.vel.x, -PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
+        else
+            self.vel.x = approach(self.vel.x, 0, PLAYER_RUN_DECEL)
+        end
     else
-        self.vel.x = approach(self.vel.x, 0, PLAYER_RUN_DECEL)
+        if leftRightMove > 0 then
+            self.vel.x = approach(self.vel.x, PLAYER_MAX_AIR_VEL, PLAYER_AIR_ACCEL)
+        elseif leftRightMove < 0 then
+            self.vel.x = approach(self.vel.x, -PLAYER_MAX_AIR_VEL, PLAYER_AIR_ACCEL)
+        else
+            self.vel.x = approach(self.vel.x, 0, PLAYER_AIR_DECEL)
+        end
     end
 
-    if leftRightMove ~= 0 then
+    --direction control
+    if self.onground and leftRightMove ~= 0 then
         self.dir = leftRightMove
+    elseif self.vel.x ~= 0 then
+        self.dir = sign(self.vel.x)
     end
 
+    --gravity and climbing
     if not self.onwall then
         self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
-        if controls.z == 1 and self.onground then
-            self.vel.y = PLAYER_JUMP_VEL
-        end
     else
         if upDownMove > 0 then
             self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_SPEED, PLAYER_CLIMB_ACCEL)
@@ -51,12 +77,19 @@ function player:update()
         else
             self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
         end
-        if controls.z == 1 then
-            self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.dir
-            self.vel.y = PLAYER_CLIMB_JUMP_VEL_Y
+    end
+
+    --jumping
+    if controls.z == 1 then
+        if self.coyoteGround <= COYOTE_TIME_GROUND then
+            self.vel.y = -PLAYER_JUMP_VEL
+        elseif self.coyoteWall <= COYOTE_TIME_WALL then
+            self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.lastWallDir
+            self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
         end
     end
 
+    --movement calculations
     local target
 
     target = self.pos.x + self.vel.x

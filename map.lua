@@ -24,7 +24,7 @@ function map:init()
     for i = 1, 10 do
         table.insert(self.screens[1].walls, wall:new(0, i))
         table.insert(self.screens[1].walls, wall:new(i, 10))
-        table.insert(self.screens[1].walls, wall:new(i+5, 8))
+        table.insert(self.screens[1].walls, wall:new(i+5, 9))
     end
     
     self.currentScreen = 1
