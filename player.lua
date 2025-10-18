@@ -7,6 +7,8 @@ function player:init()
     self.onground = false
     self.onwall = false
 
+    self.prevonwall = false
+
     self.coyoteGround = 0
     self.coyoteWall = 0
 
@@ -21,6 +23,7 @@ end
 function player:update()
     --collision state tests and coyote time
     self.onground = gameMap:wallCollide(self.groundTester)
+    self.prevonwall = self.onwall
     self.onwall = gameMap:wallCollide(self.wallTester)
 
     self.coyoteGround = self.coyoteGround + 1
@@ -42,17 +45,17 @@ function player:update()
 
     --left and right movement/deceleration
     if self.onground then
-        if leftRightMove > 0 then
+        if leftRightMove > 0 and self.vel.x < PLAYER_MAX_RUN_VEL then
             self.vel.x = approach(self.vel.x, PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
-        elseif leftRightMove < 0 then
+        elseif leftRightMove < 0 and self.vel.x > -PLAYER_MAX_RUN_VEL then
             self.vel.x = approach(self.vel.x, -PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
         else
             self.vel.x = approach(self.vel.x, 0, PLAYER_RUN_DECEL)
         end
     else
-        if leftRightMove > 0 then
+        if leftRightMove > 0 and self.vel.x < PLAYER_MAX_AIR_VEL then
             self.vel.x = approach(self.vel.x, PLAYER_MAX_AIR_VEL, PLAYER_AIR_ACCEL)
-        elseif leftRightMove < 0 then
+        elseif leftRightMove < 0 and self.vel.x > -PLAYER_MAX_AIR_VEL then
             self.vel.x = approach(self.vel.x, -PLAYER_MAX_AIR_VEL, PLAYER_AIR_ACCEL)
         else
             self.vel.x = approach(self.vel.x, 0, PLAYER_AIR_DECEL)
@@ -77,6 +80,10 @@ function player:update()
         else
             self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
         end
+    end
+
+    if self.prevonwall and not self.onwall and controls.up and self.lastWallDir == self.dir then
+        self.vel.y = -PLAYER_CLIMBUP_VEL
     end
 
     --jumping
