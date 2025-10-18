@@ -18,27 +18,44 @@ function player:update()
     self.onground = gameMap:wallCollide(self.groundTester)
     self.onwall = gameMap:wallCollide(self.wallTester)
 
-    if controls.z == 1 and self.onground then
-        self.vel.y = PLAYER_JUMP_VEL
-    end
+    local leftRightMove = 0
+    if controls.right > 0 then leftRightMove = leftRightMove + 1 end
+    if controls.left > 0 then leftRightMove = leftRightMove - 1 end
 
-    local move = 0
-    if controls.right > 0 then move = move + 1 end
-    if controls.left > 0 then move = move - 1 end
+    local upDownMove = 0
+    if controls.down > 0 then upDownMove = upDownMove + 1 end
+    if controls.up > 0 then upDownMove = upDownMove - 1 end
 
-    if move > 0 then
+    if leftRightMove > 0 then
         self.vel.x = approach(self.vel.x, PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
-    elseif move < 0 then
+    elseif leftRightMove < 0 then
         self.vel.x = approach(self.vel.x, -PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
     else
         self.vel.x = approach(self.vel.x, 0, PLAYER_RUN_DECEL)
     end
 
-    if move ~= 0 then
-        self.dir = move
+    if leftRightMove ~= 0 then
+        self.dir = leftRightMove
     end
 
-    self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+    if not self.onwall then
+        self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+        if controls.z == 1 and self.onground then
+            self.vel.y = PLAYER_JUMP_VEL
+        end
+    else
+        if upDownMove > 0 then
+            self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_SPEED, PLAYER_CLIMB_ACCEL)
+        elseif upDownMove < 0 then
+            self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_SPEED, PLAYER_CLIMB_ACCEL)
+        else
+            self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
+        end
+        if controls.z == 1 then
+            self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.dir
+            self.vel.y = PLAYER_CLIMB_JUMP_VEL_Y
+        end
+    end
 
     local target
 
