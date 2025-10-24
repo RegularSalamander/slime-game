@@ -82,7 +82,7 @@ function player:update()
         end
     end
 
-    if self.prevonwall and not self.onwall and controls.up and self.lastWallDir == self.dir then
+    if self.prevonwall and not self.onwall and controls.up > 0 and self.lastWallDir == self.dir then
         self.vel.y = -PLAYER_CLIMBUP_VEL
     end
 
@@ -127,7 +127,7 @@ end
 
 function player:move()
     self.collider:move(self.pos.x, self.pos.y)
-    self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2)
+    self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
     self.groundTester:move(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1)
 end
 
