@@ -24,7 +24,7 @@ function player:update()
     --collision state tests and coyote time
     self.onground = gameMap:wallCollide(self.groundTester)
     self.prevonwall = self.onwall
-    self.onwall = gameMap:wallCollide(self.wallTester)
+    self.onwall = gameMap:wallCollide(self.wallTester) and (self.prevonwall or self.vel.y >= 0)
 
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
@@ -90,6 +90,7 @@ function player:update()
     if controls.z == 1 then
         if self.coyoteGround <= COYOTE_TIME_GROUND then
             self.vel.y = -PLAYER_JUMP_VEL
+            self.onwall = false
         elseif self.coyoteWall <= COYOTE_TIME_WALL then
             self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.lastWallDir
             self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
