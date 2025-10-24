@@ -74,9 +74,9 @@ function player:update()
         self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
     else
         if upDownMove > 0 then
-            self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_SPEED, PLAYER_CLIMB_ACCEL)
+            self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
         elseif upDownMove < 0 then
-            self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_SPEED, PLAYER_CLIMB_ACCEL)
+            self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
         else
             self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
         end
@@ -132,9 +132,55 @@ function player:move()
 end
 
 function player:draw()
-    self.collider:draw()
-    if self.onwall then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
-    self.wallTester:draw()
-    if self.onground then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
-    self.groundTester:draw()
+    local quadx = 0
+    local quady = 0
+
+    if self.onground then
+        quady = 0
+        if self.vel.x > PLAYER_MAX_RUN_VEL/2 then
+            quadx = 1
+        elseif self.vel.x < -PLAYER_MAX_RUN_VEL/2 then
+            quadx = 2
+        end
+    elseif self.onwall then
+        if self.vel.y < -PLAYER_MAX_CLIMB_VEL/2 then
+            quady = 5
+        elseif self.vel.y > PLAYER_MAX_CLIMB_VEL/2 then
+            quady = 6
+        else
+            quady = 4
+        end
+        if self.dir == 1 then
+            quadx = 1
+        end
+    else
+        quady = 1
+        if self.vel.y > PLAYER_JUMP_VEL/4 then
+            quady = 3
+        elseif self.vel.y < -PLAYER_JUMP_VEL/4 then
+            quady = 1
+        else
+            quady = 2
+        end
+        if self.vel.x > PLAYER_MAX_AIR_VEL/2 then
+            quadx = 1
+        elseif self.vel.x < -PLAYER_MAX_AIR_VEL/2 then
+            quadx = 2
+        end
+    end
+
+    love.graphics.draw(
+        sprites.slime,
+        love.graphics.newQuad(quadx*8, quady*9, 8, 9, 32, 63),
+        math.floor(self.pos.x), math.floor(self.pos.y) - 1
+    )
+
+    if DEBUG_MODE then
+        self.collider:draw()
+        if self.onwall then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
+        self.wallTester:draw()
+        if self.onground then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
+        self.groundTester:draw()
+        return
+    end
 end

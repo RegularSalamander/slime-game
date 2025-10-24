@@ -16,7 +16,10 @@ function love.load()
 
     love.window.setMode(SCREEN_WIDTH*DEFAULT_SCALE, SCREEN_HEIGHT*DEFAULT_SCALE, { vsync = true, msaa = 0, highdpi = true, resizable=true})
     love.window.setTitle("Slime to the Top")
-    
+
+    sprites = {}
+    sprites.slime = love.graphics.newImage("assets/slime.png")
+
     gameCanvas = love.graphics.newCanvas(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     love.graphics.setBackgroundColor(0, 0, 0)
