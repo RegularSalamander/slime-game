@@ -171,7 +171,11 @@ function player:draw()
 
     love.graphics.draw(
         sprites.slime,
-        love.graphics.newQuad(quadx*8, quady*9, 8, 9, 32, 63),
+        love.graphics.newQuad(
+            quadx*PLAYER_DRAW_WIDTH, quady*PLAYER_DRAW_HEIGHT,
+            PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT,
+            PLAYER_DRAW_WIDTH*PLAYER_SPRITE_COLS, PLAYER_DRAW_HEIGHT*PLAYER_SPRITE_ROWS
+        ),
         math.floor(self.pos.x), math.floor(self.pos.y) - 1
     )
 
