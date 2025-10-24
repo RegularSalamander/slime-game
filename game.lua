@@ -9,6 +9,8 @@ function game_load()
 
     gameMap = map:new()
     gamePlayer = player:new()
+
+    love.graphics.setBackgroundColor(41/255, 173/255, 255/255)
 end
 
 function game_update()

@@ -19,6 +19,7 @@ function love.load()
 
     sprites = {}
     sprites.slime = love.graphics.newImage("assets/slime.png")
+    sprites.wall = love.graphics.newImage("assets/wall.png")
 
     gameCanvas = love.graphics.newCanvas(SCREEN_WIDTH, SCREEN_HEIGHT)
 

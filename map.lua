@@ -7,7 +7,11 @@ function wall:init(x, y, sprite)
 end
 
 function wall:draw()
-    self.collider:draw()
+    love.graphics.draw(sprites.wall, self.pos.x * TILE_SIZE, self.pos.y * TILE_SIZE - 1)
+
+    if DEBUG_MODE then
+        self.collider:draw()
+    end
 end
 
 
@@ -25,6 +29,7 @@ function map:init()
         table.insert(self.screens[1].walls, wall:new(0, i))
         table.insert(self.screens[1].walls, wall:new(i, 10))
         table.insert(self.screens[1].walls, wall:new(i+5, 8))
+        table.insert(self.screens[1].walls, wall:new(i+4, 9))
     end
     
     self.currentScreen = 1
