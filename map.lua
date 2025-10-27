@@ -3,11 +3,11 @@ wall = class:new()
 function wall:init(x, y, sprite)
     self.pos = {x=x, y=y}
     self.sprite = sprite
-    self.collider = rectcollider:new(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+    self.collider = rectcollider:new(x, y, TILE_SIZE, TILE_SIZE)
 end
 
 function wall:draw()
-    love.graphics.draw(sprites.wall, self.pos.x * TILE_SIZE, self.pos.y * TILE_SIZE - 1)
+    love.graphics.draw(sprites.wall, self.pos.x, self.pos.y - 1)
 
     if DEBUG_MODE then
         self.collider:draw()
@@ -18,21 +18,10 @@ end
 map = class:new()
 
 function map:init()
-    self.screens = {
-        {
-            walls = {}
-        }
-    }
-
-    -- testing wall tiles
-    for i = 1, 10 do
-        table.insert(self.screens[1].walls, wall:new(0, i))
-        table.insert(self.screens[1].walls, wall:new(i, 10))
-        table.insert(self.screens[1].walls, wall:new(i+5, 8))
-        table.insert(self.screens[1].walls, wall:new(i+4, 9))
-    end
-    
+    self.screens = {}
     self.currentScreen = 1
+
+    self.screens[1] = loadScreen(1, 0)
 end
 
 function map:wallCollide(other)

@@ -5,6 +5,8 @@ require "variables"
 require "util"
 
 require "map"
+require "mapLoader"
+
 require "player"
 require "game"
 
