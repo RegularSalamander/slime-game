@@ -119,7 +119,7 @@ function player:update()
             break
         end
         if col.positive and self.vel.x > 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.x = self.pos.x - 1
             local x = self.vel.x
             self.vel.x = -self.vel.y
             self.vel.y = -x
@@ -127,7 +127,7 @@ function player:update()
             break
         end
         if col.negative and self.vel.x < 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.x = self.pos.x + 1
             local x = self.vel.x
             self.vel.x = self.vel.y
             self.vel.y = x
@@ -147,7 +147,7 @@ function player:update()
             break
         end
         if col.positive and self.vel.y > 0 then
-            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.pos.y = self.pos.y - 1
             local x = self.vel.x
             self.vel.x = -self.vel.y
             self.vel.y = -x
@@ -155,7 +155,7 @@ function player:update()
             break
         end
         if col.negative and self.vel.y > 0 then
-            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.pos.y = self.pos.y - 1
             local x = self.vel.x
             self.vel.x = self.vel.y
             self.vel.y = x
@@ -183,14 +183,14 @@ function player:bounceUpdate()
             break
         end
         if col.positive and self.vel.x > 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.x = self.pos.x - 1
             local x = self.vel.x
             self.vel.x = -self.vel.y * PLAYER_BOUNCE_FALLOFF
             self.vel.y = -x * PLAYER_BOUNCE_FALLOFF
             break
         end
         if col.negative and self.vel.x < 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.x = self.pos.x + 1
             local x = self.vel.x
             self.vel.x = self.vel.y * PLAYER_BOUNCE_FALLOFF
             self.vel.y = x * PLAYER_BOUNCE_FALLOFF
@@ -213,14 +213,14 @@ function player:bounceUpdate()
             break
         end
         if col.positive and self.vel.y > 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.y = self.pos.y - 1
             local x = self.vel.x
             self.vel.x = -self.vel.y * PLAYER_BOUNCE_FALLOFF
             self.vel.y = -x * PLAYER_BOUNCE_FALLOFF
             break
         end
         if col.negative and self.vel.y > 0 then
-            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.pos.y = self.pos.y - 1
             local x = self.vel.x
             self.vel.x = self.vel.y * PLAYER_BOUNCE_FALLOFF
             self.vel.y = x * PLAYER_BOUNCE_FALLOFF
