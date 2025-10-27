@@ -52,6 +52,12 @@ end
 function game_keypressed(key, scancode, isrepeat)
     if isrepeat then return end
 
+    if (DEBUG_MODE or true) and scancode == "tab" then
+        gamePlayer.bouncing = true
+        gamePlayer.onground = false
+        gamePlayer.onwall = false
+    end
+
     --remap keys
     if scancode == "w" then scancode = "up" end
     if scancode == "a" then scancode = "left" end

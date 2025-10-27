@@ -1,11 +1,12 @@
 player = class:new()
 
 function player:init()
-    self.pos = {x = 3 * TILE_SIZE, y = 5 * TILE_SIZE}
-    self.vel = {x = 0, y = 0.01}
+    self.pos = {x = 3 * TILE_SIZE, y = 4 * TILE_SIZE}
+    self.vel = {x = 0.5, y = 0}
 
     self.onground = false
     self.onwall = false
+    self.bouncing = false
 
     self.prevonwall = false
 
@@ -15,12 +16,19 @@ function player:init()
     self.dir = 1
     self.lastWallDir = 1
 
+    self.bounceFrame = 0
+
     self.collider = rectcollider:new(self.pos.x, self.pos.y, PLAYER_WIDTH, PLAYER_HEIGHT)
     self.wallTester = pointcollider:new(self.pos.x - 1, self.pos.y + PLAYER_HEIGHT/2)
     self.groundTester = linecollider:new(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1, self.pos.x + PLAYER_WIDTH - 2, self.pos.y + PLAYER_HEIGHT + 1)
 end
 
 function player:update()
+    if self.bouncing then
+        self:bounceUpdate()
+        return
+    end
+
     --collision state tests and coyote time
     self.onground = gameMap:wallCollide(self.groundTester)
     self.prevonwall = self.onwall
@@ -125,6 +133,40 @@ function player:update()
     self:move()
 end
 
+function player:bounceUpdate()
+    self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+
+    local target
+
+    target = self.pos.x + self.vel.x
+    while self.pos.x ~= target do
+        self.pos.x = approach(self.pos.x, target, 1)
+        self:move()
+        if gameMap:wallCollide(self.collider) then
+            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF
+            break
+        end
+    end
+    
+    target = self.pos.y + self.vel.y
+    while self.pos.y ~= target do
+        self.pos.y = approach(self.pos.y, target, 1)
+        self:move()
+        if gameMap:wallCollide(self.collider) then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            if self.vel.y > 0 and self.vel.y < PLAYER_BOUNCE_THRESHOLD then
+                self.bouncing = false
+            else
+                self.vel.y = self.vel.y * -PLAYER_BOUNCE_FALLOFF
+            end
+            break
+        end
+    end
+
+    self:move()
+end
+
 function player:move()
     self.collider:move(self.pos.x, self.pos.y)
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
@@ -135,7 +177,19 @@ function player:draw()
     local quadx = 0
     local quady = 0
 
-    if self.onground then
+    if self.bouncing then
+        --bounce
+        if self.vel.x > 0 then
+            self.bounceFrame = self.bounceFrame + 1/PLAYER_BOUNCE_FRAMES
+        else
+            self.bounceFrame = self.bounceFrame - 1/PLAYER_BOUNCE_FRAMES
+        end
+        if self.bounceFrame >= 8 then self.bounceFrame = self.bounceFrame - 8 end
+        if self.bounceFrame < 0 then self.bounceFrame = self.bounceFrame + 8 end
+        quadx = 4
+        quady = math.floor(self.bounceFrame)
+    elseif self.onground then
+        --walk
         quady = 0
         if self.vel.x > PLAYER_MAX_RUN_VEL/2 then
             quadx = 1
@@ -143,6 +197,7 @@ function player:draw()
             quadx = 2
         end
     elseif self.onwall then
+        --climb
         if self.vel.y < -PLAYER_MAX_CLIMB_VEL/2 then
             quady = 5
         elseif self.vel.y > PLAYER_MAX_CLIMB_VEL/2 then
@@ -154,6 +209,7 @@ function player:draw()
             quadx = 1
         end
     else
+        --air
         quady = 1
         if self.vel.y > PLAYER_JUMP_VEL/4 then
             quady = 3
