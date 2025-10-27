@@ -19,17 +19,23 @@ map = class:new()
 
 function map:init()
     self.screens = {}
-    self.currentScreen = 1
+    self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
     self.screens[1] = loadScreen(1, 0)
+    self.screens[2] = loadScreen(2, 1)
 end
 
 function map:wallCollide(other)
-    local screen = self.screens[self.currentScreen]
+    local screen
     
-    for i = 1, #screen.walls do
-        if intersect(screen.walls[i].collider, other) then
-            return true
+    for i = self.currentScreen - 1, self.currentScreen + 1 do
+        screen = self.screens[i]
+        if screen then
+            for j = 1, #screen.walls do
+                if intersect(screen.walls[j].collider, other) then
+                    return true
+                end
+            end
         end
     end
 
@@ -37,9 +43,14 @@ function map:wallCollide(other)
 end
 
 function map:draw()
-    local screen = self.screens[self.currentScreen]
+    local screen
     
-    for i = 1, #screen.walls do
-        screen.walls[i]:draw()
+    for i = self.currentScreen - 1, self.currentScreen + 1 do
+        screen = self.screens[i]
+        if screen then
+            for j = 1, #screen.walls do
+                screen.walls[j]:draw()
+            end
+        end
     end
 end

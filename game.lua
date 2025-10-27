@@ -10,11 +10,21 @@ function game_load()
     gameMap = map:new()
     gamePlayer = player:new()
 
+    camera = {x = 0, y = 0}
+
     love.graphics.setBackgroundColor(41/255, 173/255, 255/255)
 end
 
 function game_update()
     gamePlayer:update()
+
+    if gamePlayer.pos.y < camera.y + CAMERA_HIGH_HEIGHT then
+        camera.y = gamePlayer.pos.y - CAMERA_HIGH_HEIGHT
+    end
+    if gamePlayer.pos.y > camera.y + CAMERA_LOW_HEIGHT then
+        camera.y = gamePlayer.pos.y - CAMERA_LOW_HEIGHT
+    end
+    camera.y = math.min(camera.y, 0)
 
     --update controls
     for k, v in pairs(controls) do
@@ -28,11 +38,16 @@ function game_draw()
     love.graphics.setCanvas(gameCanvas)
     love.graphics.clear()
 
+    love.graphics.push()
+    love.graphics.translate(math.floor(-camera.x), math.floor(-camera.y))
+
     love.graphics.print(gameMap:wallCollide(gamePlayer.collider) and "true" or "false", 10, 10)
 
     gameMap:draw()
 
     gamePlayer:draw()
+
+    love.graphics.pop()
 end
 
 function game_keypressed(key, scancode, isrepeat)
