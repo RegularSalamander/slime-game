@@ -40,8 +40,6 @@ function game_draw()
     love.graphics.push()
     love.graphics.translate(math.floor(-camera.x), math.floor(-camera.y))
 
-    love.graphics.print(gameMap:wallCollide(gamePlayer.collider) and "true" or "false", 10, 10)
-
     gameMap:draw()
 
     gamePlayer:draw()

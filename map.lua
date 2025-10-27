@@ -1,13 +1,33 @@
-wall = class:new()
+mapObject = class:new()
 
-function wall:init(x, y, sprite)
+function mapObject:init(x, y, spritepos, collideType)
     self.pos = {x=x, y=y}
-    self.sprite = sprite
-    self.collider = rectcollider:new(x, y, TILE_SIZE, TILE_SIZE)
+    if collideType == "square" then
+        self.collider = rectcollider:new(x, y, TILE_SIZE, TILE_SIZE)
+    elseif collideType == "positive" then
+        self.collider = linecollider:new(x+TILE_SIZE, y, x, y+TILE_SIZE)
+    elseif collideType == "negative" then
+        self.collider = linecollider:new(x, y, x+TILE_SIZE, y+TILE_SIZE)
+    elseif collideType == "left" then
+        self.collider = polycollider:new({x, y+1, x+TILE_SIZE-1, y+TILE_SIZE, x, y+TILE_SIZE})
+    elseif collideType == "right" then
+        self.collider = polycollider:new({x+TILE_SIZE, y+1, x+TILE_SIZE, y+TILE_SIZE, x+1, y+TILE_SIZE})
+    else
+        self.collider = collider:new()
+    end
+    self.spritepos = spritepos
 end
 
-function wall:draw()
-    love.graphics.draw(sprites.wall, self.pos.x, self.pos.y - 1)
+function mapObject:draw()
+    love.graphics.draw(
+        sprites.mapObject,
+        love.graphics.newQuad(
+            self.spritepos.x * TILE_SIZE, self.spritepos.y * TILE_SIZE,
+            TILE_SIZE, TILE_SIZE,
+            WALL_SPRITE_COLS * TILE_SIZE, WALL_SPRITE_ROWS * TILE_SIZE
+        ),
+        self.pos.x, self.pos.y - 1
+    )
 
     if DEBUG_MODE then
         self.collider:draw()
@@ -25,7 +45,13 @@ function map:init()
     self.screens[2] = loadScreen(2, 1)
 end
 
-function map:wallCollide(other)
+function map:collide(other)
+    local collision = {
+        wall = false,
+        positive = false,
+        negative = false
+    }
+
     local screen
     
     for i = self.currentScreen - 1, self.currentScreen + 1 do
@@ -33,13 +59,28 @@ function map:wallCollide(other)
         if screen then
             for j = 1, #screen.walls do
                 if intersect(screen.walls[j].collider, other) then
-                    return true
+                    collision.wall = true
+                    return collision
+                end
+            end
+
+            for j = 1, #screen.positive do
+                if intersect(screen.positive[j].collider, other) then
+                    collision.positive = true
+                    return collision
+                end
+            end
+
+            for j = 1, #screen.negative do
+                if intersect(screen.negative[j].collider, other) then
+                    collision.negative = true
+                    return collision
                 end
             end
         end
     end
 
-    return false
+    return collision
 end
 
 function map:draw()

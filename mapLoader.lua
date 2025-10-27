@@ -1,6 +1,8 @@
 function loadScreen(num, offset)
     local scr = {
-        walls = {}
+        walls = {},
+        positive = {},
+        negative = {}
     }
 
     local img = love.image.newImageData("map/" .. num .. ".png")
@@ -17,7 +19,13 @@ function loadScreen(num, offset)
             local ypos = y * TILE_SIZE - offset * TILE_SIZE * SCREEN_TILES_HEIGHT + 1
 
             if r == 0 and g == 0 and b == 0 then
-                table.insert(scr.walls, wall:new(xpos, ypos))
+                table.insert(scr.walls, mapObject:new(xpos, ypos, {x=1, y=0}, "square"))
+            elseif r == 128 and g == 0 and b == 0 then
+                table.insert(scr.positive, mapObject:new(xpos, ypos, {x=0, y=0}, "positive"))
+                table.insert(scr.walls, mapObject:new(xpos, ypos, {x=2, y=0}, "right"))
+            elseif r == 0 and g == 128 and b == 0 then
+                table.insert(scr.negative, mapObject:new(xpos, ypos, {x=0, y=0}, "negative"))
+                table.insert(scr.walls, mapObject:new(xpos, ypos, {x=3, y=0}, "left"))
             end
         end
     end

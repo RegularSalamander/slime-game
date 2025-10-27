@@ -1,6 +1,6 @@
 collider = class:new()
 
-function collider:init(type, points)
+function collider:init()
     self.type = "none"
     self.points = {}
 end
