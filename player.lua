@@ -6,7 +6,13 @@ function player:init()
 
     self.onground = false
     self.onwall = false
+    
     self.bouncing = false
+
+    self.mantling = false
+    self.mantlePos = {x=0, y=0}
+    self.mantlePoint = {x=0, y=0}
+    self.mantleProg = 0
 
     self.prevonwall = false
 
@@ -24,8 +30,13 @@ function player:init()
 end
 
 function player:update()
+    --player not in neutral state
     if self.bouncing then
         self:bounceUpdate()
+        return
+    end
+    if self.mantling then
+        self:mantleUpdate()
         return
     end
 
@@ -91,7 +102,11 @@ function player:update()
     end
 
     if self.prevonwall and not self.onwall and controls.up > 0 and self.lastWallDir == self.dir then
-        self.vel.y = -PLAYER_CLIMBUP_VEL
+        self.mantlePos = {x=self.pos.x, y=self.pos.y}
+        self.mantlePoint = {x=self.wallTester.points[1], y=self.wallTester.points[2]}
+        self.mantleProg = 0
+        self.mantling = true
+        return
     end
 
     --jumping
@@ -105,7 +120,7 @@ function player:update()
         end
     end
 
-    --movement and collision
+    --neutral movement and collision
     local target
 
     target = self.pos.x + self.vel.x
@@ -231,6 +246,31 @@ function player:bounceUpdate()
     self:move()
 end
 
+function player:mantleUpdate()
+    local targetX = self.mantlePoint.x
+    if self.dir == -1 then
+        targetX = self.mantlePoint.x - PLAYER_WIDTH
+    end
+    local targetY = self.mantlePoint.y - PLAYER_HEIGHT - 1
+
+    self.pos.x = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantlePos.x, targetX)
+    self.pos.y = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantlePos.y, targetY)
+
+    self:move()
+    local col = gameMap:collide(self.collider)
+    if col.positive or col.negative then
+        self.mantling = false
+        self.bouncing = true
+        return
+    end
+
+    self.mantleProg = self.mantleProg + 1
+
+    if self.mantleProg >= PLAYER_MANTLE_FRAMES then
+        self.mantling = false
+    end
+end
+
 function player:move()
     self.collider:move(self.pos.x, self.pos.y)
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
@@ -277,14 +317,14 @@ function player:draw()
         quady = 1
         if self.vel.y > PLAYER_JUMP_VEL/4 then
             quady = 3
-        elseif self.vel.y < -PLAYER_JUMP_VEL/4 then
+        elseif self.vel.y < -PLAYER_JUMP_VEL/4 or self.mantling then
             quady = 1
         else
             quady = 2
         end
-        if self.vel.x > PLAYER_MAX_AIR_VEL/2 then
+        if self.vel.x > PLAYER_MAX_AIR_VEL/2 or self.mantling and self.dir == 1  then
             quadx = 1
-        elseif self.vel.x < -PLAYER_MAX_AIR_VEL/2 then
+        elseif self.vel.x < -PLAYER_MAX_AIR_VEL/2 or self.mantling and self.dir == -1 then
             quadx = 2
         end
     end
