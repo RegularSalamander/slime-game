@@ -113,11 +113,6 @@ function player:update()
         self.pos.x = approach(self.pos.x, target, 1)
         self:move()
         local col = gameMap:collide(self.collider)
-        if col.wall then
-            self.pos.x = self.pos.x - sign(self.vel.x)
-            self.vel.x = 0
-            break
-        end
         if col.positive and self.vel.x > 0 then
             self.pos.x = self.pos.x - 1
             local x = self.vel.x
@@ -134,6 +129,11 @@ function player:update()
             self.bouncing = true
             break
         end
+        if col.wall then
+            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.vel.x = 0
+            break
+        end
     end
     
     target = self.pos.y + self.vel.y
@@ -141,11 +141,6 @@ function player:update()
         self.pos.y = approach(self.pos.y, target, 1)
         self:move()
         local col = gameMap:collide(self.collider)
-        if col.wall then
-            self.pos.y = self.pos.y - sign(self.vel.y)
-            self.vel.y = 0
-            break
-        end
         if col.positive and self.vel.y > 0 then
             self.pos.y = self.pos.y - 1
             local x = self.vel.x
@@ -160,6 +155,11 @@ function player:update()
             self.vel.x = self.vel.y
             self.vel.y = x
             self.bouncing = true
+            break
+        end
+        if col.wall then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.vel.y = 0
             break
         end
     end
@@ -177,11 +177,6 @@ function player:bounceUpdate()
         self.pos.x = approach(self.pos.x, target, 1)
         self:move()
         local col = gameMap:collide(self.collider)
-        if col.wall then
-            self.pos.x = self.pos.x - sign(self.vel.x)
-            self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF
-            break
-        end
         if col.positive and self.vel.x > 0 then
             self.pos.x = self.pos.x - 1
             local x = self.vel.x
@@ -196,6 +191,11 @@ function player:bounceUpdate()
             self.vel.y = x * PLAYER_BOUNCE_FALLOFF
             break
         end
+        if col.wall then
+            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF
+            break
+        end
     end
     
     target = self.pos.y + self.vel.y
@@ -203,15 +203,6 @@ function player:bounceUpdate()
         self.pos.y = approach(self.pos.y, target, 1)
         self:move()
         local col = gameMap:collide(self.collider)
-        if col.wall then
-            self.pos.y = self.pos.y - sign(self.vel.y)
-            if self.vel.y > 0 and self.vel.y < PLAYER_BOUNCE_THRESHOLD and math.abs(self.vel.x) < PLAYER_BOUNCE_THRESHOLD then
-                self.bouncing = false
-            else
-                self.vel.y = self.vel.y * -PLAYER_BOUNCE_FALLOFF
-            end
-            break
-        end
         if col.positive and self.vel.y > 0 then
             self.pos.y = self.pos.y - 1
             local x = self.vel.x
@@ -224,6 +215,15 @@ function player:bounceUpdate()
             local x = self.vel.x
             self.vel.x = self.vel.y * PLAYER_BOUNCE_FALLOFF
             self.vel.y = x * PLAYER_BOUNCE_FALLOFF
+            break
+        end
+        if col.wall then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            if self.vel.y > 0 and self.vel.y < PLAYER_BOUNCE_THRESHOLD and math.abs(self.vel.x) < PLAYER_BOUNCE_THRESHOLD then
+                self.bouncing = false
+            else
+                self.vel.y = self.vel.y * -PLAYER_BOUNCE_FALLOFF
+            end
             break
         end
     end

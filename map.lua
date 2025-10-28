@@ -5,13 +5,13 @@ function mapObject:init(x, y, spritepos, collideType)
     if collideType == "square" then
         self.collider = rectcollider:new(x, y, TILE_SIZE, TILE_SIZE)
     elseif collideType == "positive" then
-        self.collider = linecollider:new(x+TILE_SIZE, y, x, y+TILE_SIZE)
+        self.collider = linecollider:new(x+TILE_SIZE, y+1, x+1, y+TILE_SIZE)
     elseif collideType == "negative" then
-        self.collider = linecollider:new(x, y, x+TILE_SIZE, y+TILE_SIZE)
+        self.collider = linecollider:new(x, y+1, x+TILE_SIZE-1, y+TILE_SIZE)
     elseif collideType == "left" then
-        self.collider = polycollider:new({x, y+1, x+TILE_SIZE-1, y+TILE_SIZE, x, y+TILE_SIZE})
+        self.collider = polycollider:new({x, y+2, x+TILE_SIZE-2, y+TILE_SIZE, x, y+TILE_SIZE})
     elseif collideType == "right" then
-        self.collider = polycollider:new({x+TILE_SIZE, y+1, x+TILE_SIZE, y+TILE_SIZE, x+1, y+TILE_SIZE})
+        self.collider = polycollider:new({x+TILE_SIZE, y+2, x+TILE_SIZE, y+TILE_SIZE, x+2, y+TILE_SIZE})
     else
         self.collider = collider:new()
     end
