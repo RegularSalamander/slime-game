@@ -57,24 +57,21 @@ function map:collide(other)
     for i = self.currentScreen - 1, self.currentScreen + 1 do
         screen = self.screens[i]
         if screen then
-            for j = 1, #screen.walls do
-                if intersect(screen.walls[j].collider, other) then
-                    collision.wall = true
-                    return collision
-                end
-            end
-
             for j = 1, #screen.positive do
                 if intersect(screen.positive[j].collider, other) then
                     collision.positive = true
-                    return collision
                 end
             end
 
             for j = 1, #screen.negative do
                 if intersect(screen.negative[j].collider, other) then
                     collision.negative = true
-                    return collision
+                end
+            end
+
+            for j = 1, #screen.walls do
+                if intersect(screen.walls[j].collider, other) then
+                    collision.wall = true
                 end
             end
         end
@@ -91,6 +88,14 @@ function map:draw()
         if screen then
             for j = 1, #screen.walls do
                 screen.walls[j]:draw()
+            end
+            if DEBUG_MODE then
+                for j = 1, #screen.positive do
+                    screen.positive[j]:draw()
+                end
+                for j = 1, #screen.negative do
+                    screen.negative[j]:draw()
+                end
             end
         end
     end
