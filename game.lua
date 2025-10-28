@@ -11,7 +11,7 @@ function game_load()
     gamePlayer = player:new()
 
     camera = {x = 0, y = 0}
-    love.graphics.setBackgroundColor(60/255, 159/255, 156/255)
+    love.graphics.setBackgroundColor(48/255, 15/255, 10/255)
 end
 
 function game_update()
