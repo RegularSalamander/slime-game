@@ -205,7 +205,7 @@ function player:bounceUpdate()
         local col = gameMap:collide(self.collider)
         if col.wall then
             self.pos.y = self.pos.y - sign(self.vel.y)
-            if self.vel.y > 0 and self.vel.y < PLAYER_BOUNCE_THRESHOLD then
+            if self.vel.y > 0 and self.vel.y < PLAYER_BOUNCE_THRESHOLD and math.abs(self.vel.x) < PLAYER_BOUNCE_THRESHOLD then
                 self.bouncing = false
             else
                 self.vel.y = self.vel.y * -PLAYER_BOUNCE_FALLOFF
