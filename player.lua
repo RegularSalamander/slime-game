@@ -47,6 +47,10 @@ function player:update()
     self.prevonwall = self.onwall
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0)
 
+    if self.onground or not self.onwall then
+        self.disconnectTimer = 0
+    end
+
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
     if self.onground then self.coyoteGround = 0 end
@@ -69,7 +73,7 @@ function player:update()
         if leftRightMove == -1 * self.dir then
             self.disconnectTimer = self.disconnectTimer + 1
             if self.disconnectTimer >= PLAYER_DISCONNECT_FRAMES then
-                self.pos.x = self.pos.x - self.dir
+                self.vel.x = -self.dir
             end
         else
             self.disconnectTimer = 0
