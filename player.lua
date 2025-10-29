@@ -7,26 +7,26 @@ function player:init()
     self.onground = false
     self.onwall = false
     
-    self.bouncing = false
-
-    self.mantling = false
-    self.mantlePos = {x=0, y=0}
-    self.mantlePoint = {x=0, y=0}
-    self.mantleProg = 0
-
     self.prevonwall = false
-
-    self.coyoteGround = 0
-    self.coyoteWall = 0
+    self.prevonground = false
 
     self.dir = 1
     self.lastWallDir = 1
+    
+    self.coyoteGround = 0
+    self.coyoteWall = 0
 
+    self.bouncing = false
     self.bounceFrame = 0
+
+    self.mantling = false
+    self.mantleStart = {x=0, y=0}
+    self.mantleEnd = {x=0, y=0}
+    self.mantleProg = 0
 
     self.collider = rectcollider:new(self.pos.x, self.pos.y, PLAYER_WIDTH, PLAYER_HEIGHT)
     self.wallTester = pointcollider:new(self.pos.x - 1, self.pos.y + PLAYER_HEIGHT/2)
-    self.groundTester = linecollider:new(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1, self.pos.x + PLAYER_WIDTH - 2, self.pos.y + PLAYER_HEIGHT + 1)
+    self.groundTester = linecollider:new(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1, self.pos.x + PLAYER_WIDTH - 1, self.pos.y + PLAYER_HEIGHT + 1)
 end
 
 function player:update()
@@ -41,6 +41,7 @@ function player:update()
     end
 
     --collision state tests and coyote time
+    self.prevonground = self.onground
     self.onground = gameMap:collide(self.groundTester).wall
     self.prevonwall = self.onwall
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0)
@@ -101,12 +102,30 @@ function player:update()
         end
     end
 
+    --mantling
     if self.prevonwall and not self.onwall and controls.up > 0 and self.lastWallDir == self.dir then
-        self.mantlePos = {x=self.pos.x, y=self.pos.y}
-        self.mantlePoint = {x=self.wallTester.points[1], y=self.wallTester.points[2]}
-        self.mantleProg = 0
         self.mantling = true
+        self.mantleProg = 0
+        self.mantleStart = {x=self.pos.x, y=self.pos.y}
+        if self.dir == 1 then
+            self.mantleEnd = {x=self.wallTester.points[1], y=self.wallTester.points[2] - PLAYER_HEIGHT - 1}
+        else
+            self.mantleEnd = {x=self.wallTester.points[1] - PLAYER_WIDTH, y=self.wallTester.points[2] - PLAYER_HEIGHT - 1}
+        end
         return
+    end
+    if self.prevonground and not self.onground and controls.down > 0 then
+        self.mantling = true
+        self.mantleProg = 0
+        self.mantleStart = {x=self.pos.x, y=self.pos.y}
+        self.mantleEnd = {x=self.pos.x - PLAYER_WIDTH/2, y=self.pos.y + PLAYER_HEIGHT}
+        if self.dir == 1 then
+            self.mantleEnd = {x=self.pos.x + 1, y=self.pos.y+6}
+            self.dir = -1
+        else
+            self.mantleEnd = {x=self.pos.x - 1, y=self.pos.y+6}
+            self.dir = 1
+        end
     end
 
     --jumping
@@ -247,14 +266,8 @@ function player:bounceUpdate()
 end
 
 function player:mantleUpdate()
-    local targetX = self.mantlePoint.x
-    if self.dir == -1 then
-        targetX = self.mantlePoint.x - PLAYER_WIDTH
-    end
-    local targetY = self.mantlePoint.y - PLAYER_HEIGHT - 1
-
-    self.pos.x = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantlePos.x, targetX)
-    self.pos.y = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantlePos.y, targetY)
+    self.pos.x = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.x, self.mantleEnd.x)
+    self.pos.y = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.y, self.mantleEnd.y)
 
     self:move()
     local col = gameMap:collide(self.collider)
@@ -268,6 +281,8 @@ function player:mantleUpdate()
 
     if self.mantleProg >= PLAYER_MANTLE_FRAMES then
         self.mantling = false
+        self.vel.x = 0
+        self.vel.y = 0
     end
 end
 
