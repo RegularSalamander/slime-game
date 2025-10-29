@@ -12,6 +12,7 @@ function player:init()
 
     self.dir = 1
     self.lastWallDir = 1
+    self.disconnectTimer = 0
     
     self.coyoteGround = 0
     self.coyoteWall = 0
@@ -64,7 +65,16 @@ function player:update()
     if controls.up > 0 then upDownMove = upDownMove - 1 end
 
     --left and right movement/deceleration
-    if self.onground then
+    if self.onwall and not self.onground then
+        if leftRightMove == -1 * self.dir then
+            self.disconnectTimer = self.disconnectTimer + 1
+            if self.disconnectTimer >= PLAYER_DISCONNECT_FRAMES then
+                self.pos.x = self.pos.x - self.dir
+            end
+        else
+            self.disconnectTimer = 0
+        end
+    elseif self.onground then
         if leftRightMove > 0 and self.vel.x < PLAYER_MAX_RUN_VEL then
             self.vel.x = approach(self.vel.x, PLAYER_MAX_RUN_VEL, PLAYER_RUN_ACCEL)
         elseif leftRightMove < 0 and self.vel.x > -PLAYER_MAX_RUN_VEL then
@@ -120,10 +130,10 @@ function player:update()
         self.mantleStart = {x=self.pos.x, y=self.pos.y}
         self.mantleEnd = {x=self.pos.x - PLAYER_WIDTH/2, y=self.pos.y + PLAYER_HEIGHT}
         if self.dir == 1 then
-            self.mantleEnd = {x=self.pos.x + 1.5, y=self.pos.y+6}
+            self.mantleEnd = {x=math.floor(self.pos.x + 2), y=self.pos.y+6}
             self.dir = -1
         else
-            self.mantleEnd = {x=self.pos.x - 1.5, y=self.pos.y+6}
+            self.mantleEnd = {x=math.floor(self.pos.x - 1), y=self.pos.y+6}
             self.dir = 1
         end
     end
