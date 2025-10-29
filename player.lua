@@ -103,7 +103,7 @@ function player:update()
     end
 
     --mantling
-    if self.prevonwall and not self.onwall and controls.up > 0 and self.lastWallDir == self.dir then
+    if self.prevonwall and not self.onwall and controls.up > 0 and self.lastWallDir == self.dir and self.vel.y < 0 then
         self.mantling = true
         self.mantleProg = 0
         self.mantleStart = {x=self.pos.x, y=self.pos.y}
@@ -120,10 +120,10 @@ function player:update()
         self.mantleStart = {x=self.pos.x, y=self.pos.y}
         self.mantleEnd = {x=self.pos.x - PLAYER_WIDTH/2, y=self.pos.y + PLAYER_HEIGHT}
         if self.dir == 1 then
-            self.mantleEnd = {x=self.pos.x + 1, y=self.pos.y+6}
+            self.mantleEnd = {x=self.pos.x + 1.5, y=self.pos.y+6}
             self.dir = -1
         else
-            self.mantleEnd = {x=self.pos.x - 1, y=self.pos.y+6}
+            self.mantleEnd = {x=self.pos.x - 1.5, y=self.pos.y+6}
             self.dir = 1
         end
     end
