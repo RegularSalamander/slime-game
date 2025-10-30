@@ -5,6 +5,13 @@ function loadScreen(num, offset)
         negative = {}
     }
 
+    if love.filesystem.exists("map/imgs/" .. num .. ".png") then
+        scr.img = love.graphics.newImage("map/imgs/" .. num .. ".png")
+    else
+        scr.img = nil
+    end
+    scr.offset = offset
+
     local img = love.image.newImageData("map/" .. num .. ".png")
 
     for y = 0, img:getHeight() - 1 do

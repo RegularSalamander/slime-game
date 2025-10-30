@@ -42,9 +42,9 @@ function map:init()
     self.screens = {}
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
-    -- self.screens[1] = loadScreen(1, 0)
+    self.screens[1] = loadScreen(4, 0)
     -- self.screens[2] = loadScreen(2, 1)
-    self.screens[1] = loadScreen(3, 0)
+    --self.screens[1] = loadScreen(3, 0)
 end
 
 function map:collide(other)
@@ -88,15 +88,20 @@ function map:draw()
     for i = self.currentScreen - 1, self.currentScreen + 1 do
         screen = self.screens[i]
         if screen then
-            for j = 1, #screen.walls do
-                screen.walls[j]:draw()
-            end
-            if DEBUG_MODE then
-                for j = 1, #screen.positive do
-                    screen.positive[j]:draw()
+            love.graphics.setColor(1, 1, 1, 1)
+            if screen.img then
+                love.graphics.draw(screen.img, 0, -screen.offset * SCREEN_HEIGHT)
+            else
+                for j = 1, #screen.walls do
+                    screen.walls[j]:draw()
                 end
-                for j = 1, #screen.negative do
-                    screen.negative[j]:draw()
+                if DEBUG_MODE then
+                    for j = 1, #screen.positive do
+                        screen.positive[j]:draw()
+                    end
+                    for j = 1, #screen.negative do
+                        screen.negative[j]:draw()
+                    end
                 end
             end
         end
