@@ -46,8 +46,11 @@ function love.draw()
     love.graphics.setCanvas()
     local w, h = love.graphics.getDimensions()
     local scl = math.min(w/SCREEN_WIDTH, h/SCREEN_HEIGHT)
+    love.graphics.setBackgroundColor(0, 0, 0, 1)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(gameCanvas, w/2, h/2, 0, scl, scl, SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+
+    love.graphics.print(love.timer.getFPS(), 10, 10)
 end
 
 function love.keypressed(key, scancode, isrepeat)

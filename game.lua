@@ -11,7 +11,6 @@ function game_load()
     gamePlayer = player:new()
 
     camera = {x = 0, y = 0}
-    love.graphics.setBackgroundColor(48/255, 15/255, 10/255)
 end
 
 function game_update()
@@ -35,7 +34,10 @@ end
 
 function game_draw()
     love.graphics.setCanvas(gameCanvas)
+    
     love.graphics.clear()
+    love.graphics.setColor(48/255, 15/255, 10/255)
+    love.graphics.rectangle("fill", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 
     love.graphics.push()
     love.graphics.translate(math.floor(-camera.x), math.floor(-camera.y))

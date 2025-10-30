@@ -365,6 +365,7 @@ function player:draw()
         end
     end
 
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(
         sprites.slime,
         love.graphics.newQuad(

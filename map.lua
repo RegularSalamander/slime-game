@@ -19,6 +19,7 @@ function mapObject:init(x, y, spritepos, collideType)
 end
 
 function mapObject:draw()
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(
         sprites.mapObject,
         love.graphics.newQuad(
@@ -41,8 +42,9 @@ function map:init()
     self.screens = {}
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
-    self.screens[1] = loadScreen(1, 0)
-    self.screens[2] = loadScreen(2, 1)
+    --self.screens[1] = loadScreen(1, 0)
+    --self.screens[2] = loadScreen(2, 1)
+    self.screens[1] = loadScreen(3, 0)
 end
 
 function map:collide(other)
