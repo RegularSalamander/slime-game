@@ -13,6 +13,7 @@ function player:init()
     self.dir = 1
     self.lastWallDir = 1
     self.disconnectTimer = 0
+    self.bufferedJump = false
     
     self.coyoteGround = 0
     self.coyoteWall = 0
@@ -47,10 +48,6 @@ function player:update()
     self.prevonwall = self.onwall
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0)
 
-    if self.onground or not self.onwall then
-        self.disconnectTimer = 0
-    end
-
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
     if self.onground then self.coyoteGround = 0 end
@@ -76,7 +73,7 @@ function player:update()
                 self.vel.x = -self.dir
             end
         else
-            self.disconnectTimer = 0
+            self.disconnectTimer = PLAYER_DISCONNECT_FRAMES
         end
     elseif self.onground then
         if leftRightMove > 0 and self.vel.x < PLAYER_MAX_RUN_VEL then
@@ -140,11 +137,17 @@ function player:update()
             self.mantleEnd = {x=math.floor(self.pos.x - 1), y=self.pos.y+6}
             self.dir = 1
         end
+        self.disconnectTimer = 0
+        return
     end
 
     --jumping
-    if controls.z == 1 then
-        if self.coyoteGround <= COYOTE_TIME_GROUND then
+    if controls.z == 1 or self.bufferedJump then
+        self.bufferedJump = false
+        if self.onwall and not self.onground then
+            self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.lastWallDir
+            self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
+        elseif self.coyoteGround <= COYOTE_TIME_GROUND then
             self.vel.y = -PLAYER_JUMP_VEL
             self.onwall = false
         elseif self.coyoteWall <= COYOTE_TIME_WALL then
@@ -280,6 +283,10 @@ function player:bounceUpdate()
 end
 
 function player:mantleUpdate()
+    if controls.z > 0 and self.mantleEnd.y > self.mantleStart.y then
+        self.bufferedJump = true
+    end
+    
     self.pos.x = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.x, self.mantleEnd.x)
     self.pos.y = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.y, self.mantleEnd.y)
 
@@ -344,16 +351,16 @@ function player:draw()
     else
         --air
         quady = 1
-        if self.vel.y > PLAYER_JUMP_VEL/4 then
+        if self.vel.y > PLAYER_JUMP_VEL/4 or self.mantling and self.mantleEnd.y > self.mantleStart.y then
             quady = 3
-        elseif self.vel.y < -PLAYER_JUMP_VEL/4 or self.mantling then
+        elseif self.vel.y < -PLAYER_JUMP_VEL/4 or self.mantling and self.mantleEnd.y < self.mantleStart.y then
             quady = 1
         else
             quady = 2
         end
-        if self.vel.x > PLAYER_MAX_AIR_VEL/2 or self.mantling and self.dir == 1  then
+        if self.vel.x > PLAYER_MAX_AIR_VEL/2 or self.mantling and self.mantleEnd.x > self.mantleStart.x  then
             quadx = 1
-        elseif self.vel.x < -PLAYER_MAX_AIR_VEL/2 or self.mantling and self.dir == -1 then
+        elseif self.vel.x < -PLAYER_MAX_AIR_VEL/2 or self.mantling and self.mantleEnd.x < self.mantleStart.x then
             quadx = 2
         end
     end
