@@ -116,6 +116,7 @@ function player:update()
             self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
             self.climbTime = self.climbTime + PLAYER_GRAB_INCREASE
         elseif upDownMove < 0 then
+            self.prevonground = false
             self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
             self.climbTime = self.climbTime + PLAYER_CLIMB_INCREASE
         else
@@ -158,12 +159,15 @@ function player:update()
         if self.onwall and not self.onground then
             self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.lastWallDir
             self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
+            self.dir = -self.dir
         elseif self.coyoteGround <= COYOTE_TIME_GROUND then
+            self.onground = false
             self.vel.y = -PLAYER_JUMP_VEL
             self.onwall = false
         elseif self.coyoteWall <= COYOTE_TIME_WALL then
             self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * -self.lastWallDir
             self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
+            self.dir = -self.dir
         end
     end
 

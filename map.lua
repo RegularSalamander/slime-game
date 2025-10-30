@@ -42,8 +42,8 @@ function map:init()
     self.screens = {}
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
-    --self.screens[1] = loadScreen(1, 0)
-    --self.screens[2] = loadScreen(2, 1)
+    -- self.screens[1] = loadScreen(1, 0)
+    -- self.screens[2] = loadScreen(2, 1)
     self.screens[1] = loadScreen(3, 0)
 end
 
