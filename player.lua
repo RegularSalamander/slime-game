@@ -18,6 +18,9 @@ function player:init()
     self.coyoteGround = 0
     self.coyoteWall = 0
 
+    self.climbTime = 0
+    self.climbFrame = 0
+
     self.bouncing = false
     self.bounceFrame = 0
 
@@ -50,7 +53,10 @@ function player:update()
 
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
-    if self.onground then self.coyoteGround = 0 end
+    if self.onground then
+        self.coyoteGround = 0
+        self.climbTime = 0
+    end
     if self.onwall then
         self.coyoteWall = 0
         self.lastWallDir = self.dir
@@ -103,13 +109,18 @@ function player:update()
     --gravity and climbing
     if not self.onwall then
         self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+    elseif self.climbTime > PLAYER_CLIMB_TIME then
+        self.vel.y = self.vel.y + PLAYER_SLIDE_GRAV
     else
         if upDownMove > 0 then
             self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
+            self.climbTime = self.climbTime + PLAYER_GRAB_INCREASE
         elseif upDownMove < 0 then
             self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
+            self.climbTime = self.climbTime + PLAYER_CLIMB_INCREASE
         else
             self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
+            self.climbTime = self.climbTime + PLAYER_GRAB_INCREASE
         end
     end
 
@@ -348,6 +359,15 @@ function player:draw()
         if self.dir == 1 then
             quadx = 1
         end
+        
+        --blinking
+        if self.climbTime >= PLAYER_CLIMB_WARNING then
+            self.climbFrame = self.climbFrame + 1/PLAYER_CLIMB_BLINK
+        else
+            self.climbFrame = 0.99
+        end
+        if self.climbFrame >= 2 then self.climbFrame = self.climbFrame - 2 end
+        quadx = quadx + 2 * math.floor(self.climbFrame)
     else
         --air
         quady = 1
