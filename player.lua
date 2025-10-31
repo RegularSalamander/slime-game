@@ -307,9 +307,22 @@ function player:mantleUpdate()
 
     self:move()
     local col = gameMap:collide(self.collider)
-    if col.positive or col.negative then
+    if col.positive then
         self.mantling = false
         self.bouncing = true
+        self.pos.x = self.pos.x - 2
+        self.pos.y = self.pos.y - 1
+        self.vel.x = -0.5
+        self:move()
+        return
+    end
+    if col.negative then
+        self.mantling = false
+        self.bouncing = true
+        self.pos.x = self.pos.x + 2
+        self.pos.y = self.pos.y - 1
+        self.vel.x = 0.5
+        self:move()
         return
     end
 
