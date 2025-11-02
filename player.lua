@@ -259,7 +259,7 @@ function player:bounceUpdate()
         end
         if col.wall then
             self.pos.x = self.pos.x - sign(self.vel.x)
-            self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF
+            self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF_X
             break
         end
     end
@@ -280,7 +280,7 @@ function player:bounceUpdate()
             self.pos.y = self.pos.y - 1
             local x = self.vel.x
             self.vel.x = self.vel.y * PLAYER_BOUNCE_FALLOFF
-            self.vel.y = x * PLAYER_BOUNCE_FALLOFF
+            self.vel.y = x * PLAYER_BOUNCE_FALLOFF_Y
             break
         end
         if col.wall then

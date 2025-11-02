@@ -16,6 +16,10 @@ end
 function game_update()
     gamePlayer:update()
 
+    gameMap.currentScreen = math.floor(gamePlayer.pos.y * -1 / SCREEN_HEIGHT) + 2
+
+    io.write(gameMap.currentScreen)
+
     if gamePlayer.pos.y < camera.y + CAMERA_HIGH_HEIGHT then
         camera.y = gamePlayer.pos.y - CAMERA_HIGH_HEIGHT
     end
