@@ -18,17 +18,19 @@ function mapObject:init(x, y, spritepos, collideType)
     self.spritepos = spritepos
 end
 
-function mapObject:draw()
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.draw(
-        sprites.mapObject,
-        love.graphics.newQuad(
-            self.spritepos.x * TILE_SIZE, self.spritepos.y * TILE_SIZE,
-            TILE_SIZE, TILE_SIZE,
-            WALL_SPRITE_COLS * TILE_SIZE, WALL_SPRITE_ROWS * TILE_SIZE
-        ),
-        self.pos.x, self.pos.y - 1
-    )
+function mapObject:draw(drawTile)
+    if drawTile then
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(
+            sprites.mapObject,
+            love.graphics.newQuad(
+                self.spritepos.x * TILE_SIZE, self.spritepos.y * TILE_SIZE,
+                TILE_SIZE, TILE_SIZE,
+                WALL_SPRITE_COLS * TILE_SIZE, WALL_SPRITE_ROWS * TILE_SIZE
+            ),
+            self.pos.x, self.pos.y - 1
+        )
+    end
 
     if DEBUG_MODE then
         self.collider:draw()
@@ -85,7 +87,7 @@ function map:collide(other)
     return collision
 end
 
-function map:draw()
+function map:draw(debug)
     local screen
     
     for i = self.currentScreen - 1, self.currentScreen + 1 do
@@ -96,15 +98,19 @@ function map:draw()
                 love.graphics.draw(screen.img, 0, -screen.offset * SCREEN_HEIGHT)
             else
                 for j = 1, #screen.walls do
-                    screen.walls[j]:draw()
+                    screen.walls[j]:draw(true)
                 end
-                if DEBUG_MODE then
-                    for j = 1, #screen.positive do
-                        screen.positive[j]:draw()
-                    end
-                    for j = 1, #screen.negative do
-                        screen.negative[j]:draw()
-                    end
+            end
+
+            if DEBUG_MODE then
+                for j = 1, #screen.walls do
+                    screen.walls[j]:draw(false)
+                end
+                for j = 1, #screen.positive do
+                    screen.positive[j]:draw()
+                end
+                for j = 1, #screen.negative do
+                    screen.negative[j]:draw()
                 end
             end
         end
