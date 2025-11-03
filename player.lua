@@ -108,9 +108,13 @@ function player:update()
 
     --gravity and climbing
     if not self.onwall then
-        self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+        if self.vel.y < PLAYER_MAX_FALL_VEL then
+            self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+        end
     elseif self.climbTime > PLAYER_CLIMB_TIME then
-        self.vel.y = self.vel.y + PLAYER_SLIDE_GRAV
+        if self.vel.y < PLAYER_MAX_SLIDE_VEL then
+            self.vel.y = self.vel.y + PLAYER_SLIDE_GRAV
+        end
     else
         if upDownMove > 0 then
             self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
@@ -234,7 +238,9 @@ function player:update()
 end
 
 function player:bounceUpdate()
-    self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+    if self.vel.y < PLAYER_MAX_FALL_VEL then
+        self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+    end
 
     local target
 
