@@ -44,11 +44,11 @@ function map:init()
     self.screens = {}
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
-    self.screens[1] = loadScreen(1, 0)
-    self.screens[2] = loadScreen(2, 1)
-    self.screens[3] = loadScreen(3, 2)
-    self.screens[4] = loadScreen(6, 3)
-    self.screens[5] = loadScreen(7, 4)
+    self.screens[1] = loadScreen(1, 0, 3, 1)
+    self.screens[2] = loadScreen(2, 1, 1)
+    self.screens[3] = loadScreen(3, 2, 1)
+    self.screens[4] = loadScreen(4, 3, 1)
+    self.screens[5] = loadScreen(5, 4, 1)
     -- self.screens[1] = loadScreen(4, 0)
 end
 
@@ -111,6 +111,42 @@ function map:draw(debug)
                 end
                 for j = 1, #screen.negative do
                     screen.negative[j]:draw()
+                end
+            end
+        end
+    end
+end
+
+function map:drawBack(debug)
+    local screen
+    
+    for i = self.currentScreen - 1, self.currentScreen + 1 do
+        screen = self.screens[i]
+        if screen then
+            love.graphics.setColor(1, 1, 1, 1)
+            if screen.bg[math.floor(screen.bgFrame)] then
+                love.graphics.draw(screen.bg[math.floor(screen.bgFrame)], 0, -screen.offset * SCREEN_HEIGHT)
+                screen.bgFrame = screen.bgFrame + 1/MAP_FRAMES
+                if screen.bgFrame >= #screen.bg + 1 then
+                    screen.bgFrame = screen.bgFrame - #screen.bg
+                end
+            end
+        end
+    end
+end
+
+function map:drawFore(debug)
+    local screen
+    
+    for i = self.currentScreen - 1, self.currentScreen + 1 do
+        screen = self.screens[i]
+        if screen then
+            love.graphics.setColor(1, 1, 1, 1)
+            if screen.fg[math.floor(screen.fgFrame)] then
+                love.graphics.draw(screen.fg[math.floor(screen.fgFrame)], 0, -screen.offset * SCREEN_HEIGHT)
+                screen.fgFrame = screen.fgFrame + 1/MAP_FRAMES
+                if screen.fgFrame >= #screen.fg + 1 then
+                    screen.fgFrame = screen.fgFrame - #screen.fg
                 end
             end
         end

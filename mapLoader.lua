@@ -1,15 +1,32 @@
-function loadScreen(num, offset)
+function loadScreen(num, offset, bgFrames, fgFrames)
     local scr = {
         walls = {},
         positive = {},
         negative = {}
     }
 
-    if love.filesystem.exists("map/imgs/" .. num .. ".png") then
-        scr.img = love.graphics.newImage("map/imgs/" .. num .. ".png")
-    else
-        scr.img = nil
+    if not bgFrames then bgFrames = 0 end
+    if not fgFrames then fgFrames = 0 end
+    scr.img = nil
+    if love.filesystem.getInfo("assets/map/" .. num .. ".png") then
+        scr.img = love.graphics.newImage("assets/map/" .. num .. ".png")
     end
+    scr.bg = {}
+    for i = 1, bgFrames do
+        if love.filesystem.getInfo("assets/map/" .. num .. "_bg" .. i ..".png") then
+            scr.bg[i] = love.graphics.newImage("assets/map/" .. num .. "_bg" .. i ..".png")
+        end
+    end
+    scr.fg = {}
+    for i = 1, fgFrames do
+        if love.filesystem.getInfo("assets/map/" .. num .. "_fg" .. i ..".png") then
+            scr.fg[i] = love.graphics.newImage("assets/map/" .. num .. "_fg" .. i ..".png")
+        end
+    end
+
+    scr.bgFrame = 1
+    scr.fgFrame = 1
+    
     scr.offset = offset
 
     local img = love.image.newImageData("map/" .. num .. ".png")

@@ -46,9 +46,12 @@ function game_draw()
     love.graphics.push()
     love.graphics.translate(math.floor(-camera.x), math.floor(-camera.y))
 
+    gameMap:drawBack()
     gameMap:draw()
 
     gamePlayer:draw()
+
+    gameMap:drawFore()
 
     love.graphics.pop()
 end
