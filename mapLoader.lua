@@ -2,7 +2,9 @@ function loadScreen(num, offset, bgFrames, fgFrames)
     local scr = {
         walls = {},
         positive = {},
-        negative = {}
+        negative = {},
+        water = {},
+        obstacles = {}
     }
 
     if not bgFrames then bgFrames = 0 end
@@ -50,6 +52,13 @@ function loadScreen(num, offset, bgFrames, fgFrames)
             elseif r == 0 and g == 128 and b == 0 then
                 table.insert(scr.negative, mapObject:new(xpos, ypos, {x=0, y=0}, "negative"))
                 table.insert(scr.walls, mapObject:new(xpos, ypos, {x=3, y=0}, "left"))
+            elseif r == 0 and g == 0 and b == 255 then
+                table.insert(scr.water, mapObject:new(xpos, ypos, {x=4, y=0}, "square"))
+            elseif r == 255 and g == 255 and b < 4 then
+                if b == 0 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=5, y=0}, "spikeTop")) end
+                if b == 1 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=6, y=0}, "spikeRight")) end
+                if b == 2 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=7, y=0}, "spikeBottom")) end
+                if b == 3 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=8, y=0}, "spikeLeft")) end
             end
         end
     end

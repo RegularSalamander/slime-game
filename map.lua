@@ -1,43 +1,3 @@
-mapObject = class:new()
-
-function mapObject:init(x, y, spritepos, collideType)
-    self.pos = {x=x, y=y}
-    if collideType == "square" then
-        self.collider = rectcollider:new(x, y, TILE_SIZE, TILE_SIZE)
-    elseif collideType == "positive" then
-        self.collider = linecollider:new(x+TILE_SIZE, y+1, x+1, y+TILE_SIZE)
-    elseif collideType == "negative" then
-        self.collider = linecollider:new(x, y+1, x+TILE_SIZE-1, y+TILE_SIZE)
-    elseif collideType == "left" then
-        self.collider = polycollider:new({x, y+2, x+TILE_SIZE-2, y+TILE_SIZE, x, y+TILE_SIZE})
-    elseif collideType == "right" then
-        self.collider = polycollider:new({x+TILE_SIZE, y+2, x+TILE_SIZE, y+TILE_SIZE, x+2, y+TILE_SIZE})
-    else
-        self.collider = collider:new()
-    end
-    self.spritepos = spritepos
-end
-
-function mapObject:draw(drawTile)
-    if drawTile then
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.draw(
-            sprites.mapObject,
-            love.graphics.newQuad(
-                self.spritepos.x * TILE_SIZE, self.spritepos.y * TILE_SIZE,
-                TILE_SIZE, TILE_SIZE,
-                WALL_SPRITE_COLS * TILE_SIZE, WALL_SPRITE_ROWS * TILE_SIZE
-            ),
-            self.pos.x, self.pos.y - 1
-        )
-    end
-
-    if DEBUG_MODE then
-        self.collider:draw()
-    end
-end
-
-
 map = class:new()
 
 function map:init()
@@ -45,11 +5,10 @@ function map:init()
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
     self.screens[1] = loadScreen(1, 0, 3, 1)
-    self.screens[2] = loadScreen(2, 1, 1)
-    self.screens[3] = loadScreen(3, 2, 1)
-    self.screens[4] = loadScreen(4, 3, 1)
-    self.screens[5] = loadScreen(5, 4, 1)
-    -- self.screens[1] = loadScreen(4, 0)
+    self.screens[2] = loadScreen(2, 1)
+    self.screens[3] = loadScreen(3, 2)
+    self.screens[4] = loadScreen(4, 3)
+    self.screens[5] = loadScreen(5, 4)
 
     self.sideLeft = linecollider:new(0, 1000, 0, -100000)
     self.sideRight = linecollider:new(128, 1000, 128, -100000)
@@ -59,7 +18,9 @@ function map:collide(other)
     local collision = {
         wall = false,
         positive = false,
-        negative = false
+        negative = false,
+        water = false,
+        obstacle = false
     }
 
     if intersect(self.sideLeft, other) or intersect(self.sideRight, other) then
@@ -88,6 +49,19 @@ function map:collide(other)
                     collision.wall = true
                 end
             end
+
+            for j = 1, #screen.water do
+                if intersect(screen.water[j].collider, other) then
+                    collision.water = true
+                end
+            end
+
+            for j = 1, #screen.obstacles do
+                if intersect(screen.obstacles[j].collider, other) then
+                    collision.obstacle = true
+                    collision.sendDir = screen.obstacles[j].sendDir(other.points[1], other.points[2])
+                end
+            end
         end
     end
 
@@ -107,6 +81,12 @@ function map:draw(debug)
                 for j = 1, #screen.walls do
                     screen.walls[j]:draw(true)
                 end
+                for j = 1, #screen.water do
+                    screen.water[j]:draw(true)
+                end
+                for j = 1, #screen.obstacles do
+                    screen.obstacles[j]:draw(true)
+                end
             end
 
             if DEBUG_MODE then
@@ -118,6 +98,12 @@ function map:draw(debug)
                 end
                 for j = 1, #screen.negative do
                     screen.negative[j]:draw()
+                end
+                for j = 1, #screen.water do
+                    screen.water[j]:draw()
+                end
+                for j = 1, #screen.obstacles do
+                    screen.obstacles[j]:draw()
                 end
             end
         end

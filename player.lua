@@ -32,6 +32,7 @@ function player:init()
     self.collider = rectcollider:new(self.pos.x, self.pos.y, PLAYER_WIDTH, PLAYER_HEIGHT)
     self.wallTester = pointcollider:new(self.pos.x - 1, self.pos.y + PLAYER_HEIGHT/2)
     self.groundTester = linecollider:new(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1, self.pos.x + PLAYER_WIDTH - 1, self.pos.y + PLAYER_HEIGHT + 1)
+    self.waterTester = linecollider:new(self.pos.x, self.pos.y + PLAYER_HEIGHT/2, self.pos.x + PLAYER_WIDTH, self.pos.y + PLAYER_HEIGHT/2 - 1)
 end
 
 function player:update()
@@ -50,6 +51,8 @@ function player:update()
     self.onground = gameMap:collide(self.groundTester).wall
     self.prevonwall = self.onwall
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0)
+    self.previnwater = self.inwater
+    self.inwater = gameMap:collide(self.waterTester).water
 
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
@@ -175,6 +178,19 @@ function player:update()
         end
     end
 
+    --water behavior
+    if self.inwater and self.onground and not self.onwall and controls.up > 0 then
+        self.onground = false
+    end
+    if self.inwater and not self.onwall and not self.onground then
+        self.vel.y = self.vel.y - PLAYER_WATER_FLOAT
+        self.vel.y = self.vel.y * PLAYER_WATER_SLOW
+        self.vel.x = self.vel.x * PLAYER_WATER_SLOW
+    end
+    if not self.inwater and self.previnwater then
+        self.vel.y = self.vel.y - PLAYER_WATER_PUSH
+    end
+
     --neutral movement and collision
     local target
 
@@ -202,6 +218,13 @@ function player:update()
         if col.wall then
             self.pos.x = self.pos.x - sign(self.vel.x)
             self.vel.x = 0
+            break
+        end
+        if col.obstacle then
+            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
+            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self.bouncing = true
             break
         end
     end
@@ -232,6 +255,13 @@ function player:update()
             self.vel.y = 0
             break
         end
+        if col.obstacle then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
+            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self.bouncing = true
+            break
+        end
     end
 
     self:move()
@@ -240,6 +270,23 @@ end
 function player:bounceUpdate()
     if self.vel.y < PLAYER_MAX_FALL_VEL then
         self.vel.y = self.vel.y + PLAYER_GRAVITY_ACCEL
+    end
+
+    --water behavior
+    self.previnwater = self.inwater
+    self.inwater = gameMap:collide(self.waterTester).water
+    if self.inwater then
+        self.vel.y = self.vel.y - PLAYER_WATER_FLOAT
+        self.vel.y = self.vel.y * PLAYER_WATER_SLOW
+        self.vel.x = self.vel.x * PLAYER_WATER_SLOW
+
+        if math.abs(self.vel.y) < PLAYER_BOUNCE_THRESHOLD then
+            self.bouncing = false
+            return
+        end
+    end
+    if not self.inwater and self.previnwater then
+        self.vel.y = self.vel.y - PLAYER_WATER_PUSH
     end
 
     local target
@@ -266,6 +313,12 @@ function player:bounceUpdate()
         if col.wall then
             self.pos.x = self.pos.x - sign(self.vel.x)
             self.vel.x = self.vel.x * -PLAYER_BOUNCE_FALLOFF_X
+            break
+        end
+        if col.obstacle then
+            self.pos.x = self.pos.x - sign(self.vel.x)
+            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
+            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
             break
         end
     end
@@ -296,6 +349,12 @@ function player:bounceUpdate()
             else
                 self.vel.y = self.vel.y * -PLAYER_BOUNCE_FALLOFF
             end
+            break
+        end
+        if col.obstacle then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
+            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
             break
         end
     end
@@ -345,6 +404,7 @@ function player:move()
     self.collider:move(self.pos.x, self.pos.y)
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
     self.groundTester:move(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1)
+    self.waterTester:move(self.pos.x, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
 end
 
 function player:draw()
@@ -420,11 +480,13 @@ function player:draw()
     )
 
     if DEBUG_MODE then
+        love.graphics.setColor(1, 1, 1, 1)
         self.collider:draw()
         if self.onwall then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
         self.wallTester:draw()
         if self.onground then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
         self.groundTester:draw()
-        return
+        if self.inwater then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
+        self.waterTester:draw()
     end
 end

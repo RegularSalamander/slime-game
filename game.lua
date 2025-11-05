@@ -60,9 +60,10 @@ function game_keypressed(key, scancode, isrepeat)
     if isrepeat then return end
 
     if (DEBUG_MODE or true) and scancode == "tab" then
-        gamePlayer.bouncing = true
-        gamePlayer.onground = false
-        gamePlayer.onwall = false
+        -- gamePlayer.bouncing = true
+        -- gamePlayer.onground = false
+        -- gamePlayer.onwall = false
+        gamePlayer.pos.y = gamePlayer.pos.y - 128
     end
 
     --remap keys

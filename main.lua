@@ -4,6 +4,7 @@ require "colliders"
 require "variables"
 require "util"
 
+require "mapObjects"
 require "map"
 require "mapLoader"
 
