@@ -113,7 +113,7 @@ function player:update()
         end
     elseif self.climbTime > PLAYER_CLIMB_TIME then
         if self.vel.y < PLAYER_MAX_SLIDE_VEL then
-            self.vel.y = self.vel.y + PLAYER_SLIDE_GRAV
+            self.vel.y = approach(self.vel.y, PLAYER_MAX_SLIDE_VEL, PLAYER_SLIDE_GRAV)
         end
     else
         if upDownMove > 0 then
@@ -234,7 +234,7 @@ function player:update()
         end
     end
 
-    self:move(true)
+    self:move()
 end
 
 function player:bounceUpdate()
@@ -300,7 +300,7 @@ function player:bounceUpdate()
         end
     end
 
-    self:move(true)
+    self:move()
 end
 
 function player:mantleUpdate()
@@ -311,7 +311,7 @@ function player:mantleUpdate()
     self.pos.x = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.x, self.mantleEnd.x)
     self.pos.y = mapFunc(self.mantleProg, 0, PLAYER_MANTLE_FRAMES, self.mantleStart.y, self.mantleEnd.y)
 
-    self:move(true)
+    self:move()
     local col = gameMap:collide(self.collider)
     if col.positive then
         self.mantling = false
@@ -319,7 +319,7 @@ function player:mantleUpdate()
         self.pos.x = self.pos.x - 2
         self.pos.y = self.pos.y - 1
         self.vel.x = -0.5
-        self:move(true)
+        self:move()
         return
     end
     if col.negative then
@@ -328,7 +328,7 @@ function player:mantleUpdate()
         self.pos.x = self.pos.x + 2
         self.pos.y = self.pos.y - 1
         self.vel.x = 0.5
-        self:move(true)
+        self:move()
         return
     end
 
@@ -341,11 +341,7 @@ function player:mantleUpdate()
     end
 end
 
-function player:move(isFinal)
-    if isFinal then
-        self.pos.x = math.max(0, math.min(SCREEN_WIDTH - PLAYER_WIDTH, self.pos.x))
-    end
-
+function player:move()
     self.collider:move(self.pos.x, self.pos.y)
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
     self.groundTester:move(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1)

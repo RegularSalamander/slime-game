@@ -50,6 +50,9 @@ function map:init()
     self.screens[4] = loadScreen(4, 3, 1)
     self.screens[5] = loadScreen(5, 4, 1)
     -- self.screens[1] = loadScreen(4, 0)
+
+    self.sideLeft = linecollider:new(0, 1000, 0, -100000)
+    self.sideRight = linecollider:new(128, 1000, 128, -100000)
 end
 
 function map:collide(other)
@@ -58,6 +61,10 @@ function map:collide(other)
         positive = false,
         negative = false
     }
+
+    if intersect(self.sideLeft, other) or intersect(self.sideRight, other) then
+        collision.wall = true
+    end
 
     local screen
     
