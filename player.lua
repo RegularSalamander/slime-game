@@ -144,7 +144,7 @@ function player:update()
         end
         return
     end
-    if self.prevonground and not self.onground and controls.down > 0 then
+    if self.prevonground and not self.onground and controls.down > 0 and not self.inwater then
         self.mantling = true
         self.mantleProg = 0
         self.mantleStart = {x=self.pos.x, y=self.pos.y}
@@ -179,10 +179,7 @@ function player:update()
     end
 
     --water behavior
-    if self.inwater and self.onground and not self.onwall and controls.up > 0 then
-        self.onground = false
-    end
-    if self.inwater and not self.onwall and not self.onground then
+    if self.inwater and (not self.onwall or self.onground) then
         self.vel.y = self.vel.y - PLAYER_WATER_FLOAT
         self.vel.y = self.vel.y * PLAYER_WATER_SLOW
         self.vel.x = self.vel.x * PLAYER_WATER_SLOW
@@ -265,6 +262,11 @@ function player:update()
     end
 
     self:move()
+    local col = gameMap:collide(self.collider)
+    if col.wall then
+        self.pos.y = self.pos.y + 2
+        self:move()
+    end
 end
 
 function player:bounceUpdate()
