@@ -50,7 +50,7 @@ function player:update()
     self.prevonground = self.onground
     self.onground = gameMap:collide(self.groundTester).wall
     self.prevonwall = self.onwall
-    self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0)
+    self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0 or self.inwater)
     self.previnwater = self.inwater
     self.inwater = gameMap:collide(self.waterTester).water
 
@@ -189,6 +189,9 @@ function player:update()
     end
     if not self.inwater and self.previnwater then
         self.vel.y = self.vel.y - PLAYER_WATER_PUSH
+    end
+    if self.inwater and not self.onwall and self.prevonwall and controls.down > 0 then
+        self.vel.y = self.vel.y + PLAYER_WATER_CLIMB_PUSH
     end
 
     --neutral movement and collision
