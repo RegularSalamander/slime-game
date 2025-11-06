@@ -58,11 +58,14 @@ function player:update()
     self.coyoteWall = self.coyoteWall + 1
     if self.onground then
         self.coyoteGround = 0
-        self.climbTime = 0
     end
     if self.onwall then
         self.coyoteWall = 0
         self.lastWallDir = self.dir
+    end
+
+    if self.onground or self.inwater then
+        self.climbTime = 0
     end
 
     --controls
