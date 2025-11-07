@@ -225,8 +225,8 @@ function player:update()
         end
         if col.obstacle then
             self.pos.x = self.pos.x - sign(self.vel.x)
-            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
-            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self:sendX(col.sendDir.x)
+            self:sendY(col.sendDir.y)
             self.bouncing = true
             break
         end
@@ -260,8 +260,8 @@ function player:update()
         end
         if col.obstacle then
             self.pos.y = self.pos.y - sign(self.vel.y)
-            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
-            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self:sendX(col.sendDir.x)
+            self:sendY(col.sendDir.y)
             self.bouncing = true
             break
         end
@@ -325,8 +325,8 @@ function player:bounceUpdate()
         end
         if col.obstacle then
             self.pos.x = self.pos.x - sign(self.vel.x)
-            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
-            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self:sendX(col.sendDir.x)
+            self:sendY(col.sendDir.y)
             break
         end
     end
@@ -361,8 +361,8 @@ function player:bounceUpdate()
         end
         if col.obstacle then
             self.pos.y = self.pos.y - sign(self.vel.y)
-            self.vel.x = col.sendDir.x * PLAYER_OBSTACLE_SEND_VEL
-            self.vel.y = col.sendDir.y * PLAYER_OBSTACLE_SEND_VEL
+            self:sendX(col.sendDir.x)
+            self:sendY(col.sendDir.y)
             break
         end
     end
@@ -413,6 +413,19 @@ function player:move()
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
     self.groundTester:move(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1)
     self.waterTester:move(self.pos.x, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
+end
+
+function player:sendX(vel)
+    if vel ~= 0 then
+        self.vel.x = vel * PLAYER_OBSTACLE_SEND_VEL
+    else
+        if self.vel.x == 0 then self.vel.x = 1 end
+        self.vel.x = sign(self.vel.x)
+    end
+end
+
+function player:sendY(vel)
+    if vel ~= 0 then self.vel.y = vel * PLAYER_OBSTACLE_SEND_VEL end
 end
 
 function player:draw()
