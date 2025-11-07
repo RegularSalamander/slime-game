@@ -19,6 +19,7 @@ function player:init()
     self.coyoteWall = 0
 
     self.climbTime = 0
+    self.ropeImmune = 0
     self.climbFrame = 0
     self.ropeFrame = 0
 
@@ -55,8 +56,10 @@ function player:update()
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0 or self.inwater)
     self.previnwater = self.inwater
     self.inwater = gameMap:collide(self.waterTester).water
-    self.onrope = gameMap:collide(self.ropeTester).rope
-
+    
+    --rope behavior
+    self.ropeImmune = self.ropeImmune - 1
+    self.onrope = self.ropeImmune <= 0 and gameMap:collide(self.ropeTester).rope
     if self.onrope then
         self:ropeUpdate()
         return
@@ -431,9 +434,9 @@ function player:ropeUpdate()
     if leftRightMove ~= 0 and controls.z == 1 then
         self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * leftRightMove
         self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
-        self.pos.x = self.pos.x + 2 * leftRightMove
         self:move()
         self.onrope = false
+        self.ropeImmune = PLAYER_ROPE_IMMUNE_FRAMES
         return
     end
 
