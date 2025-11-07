@@ -9,6 +9,8 @@ function map:init()
     self.screens[3] = loadScreen(3, 2)
     self.screens[4] = loadScreen(4, 3)
     self.screens[5] = loadScreen(5, 4)
+    self.screens[6] = loadScreen(6, 5)
+    self.screens[7] = loadScreen(7, 6)
 
     self.sideLeft = linecollider:new(0, 1000, 0, -100000)
     self.sideRight = linecollider:new(128, 1000, 128, -100000)
@@ -20,6 +22,7 @@ function map:collide(other)
         positive = false,
         negative = false,
         water = false,
+        rope = false,
         obstacle = false
     }
 
@@ -56,6 +59,12 @@ function map:collide(other)
                 end
             end
 
+            for j = 1, #screen.rope do
+                if intersect(screen.rope[j].collider, other) then
+                    collision.rope = true
+                end
+            end
+
             for j = 1, #screen.obstacles do
                 if intersect(screen.obstacles[j].collider, other) then
                     collision.obstacle = true
@@ -84,6 +93,9 @@ function map:draw(debug)
                 for j = 1, #screen.water do
                     screen.water[j]:draw(true)
                 end
+                for j = 1, #screen.rope do
+                    screen.rope[j]:draw(true)
+                end
                 for j = 1, #screen.obstacles do
                     screen.obstacles[j]:draw(true)
                 end
@@ -98,6 +110,9 @@ function map:draw(debug)
                 end
                 for j = 1, #screen.negative do
                     screen.negative[j]:draw()
+                end
+                for j = 1, #screen.rope do
+                    screen.rope[j]:draw()
                 end
                 for j = 1, #screen.water do
                     screen.water[j]:draw()

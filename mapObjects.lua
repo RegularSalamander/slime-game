@@ -24,6 +24,8 @@ function mapObject:init(x, y, spritepos, collideType)
     elseif collideType == "spikeLeft" then
         self.collider = linecollider:new(x+1, y+1, x+1, y+TILE_SIZE-1)
         self.sendDir = function(x, y) return {x=1, y=0} end
+    elseif collideType == "rope" then
+        self.collider = linecollider:new(x+TILE_SIZE/2, y, x+TILE_SIZE/2, y+TILE_SIZE)
     else
         self.collider = collider:new()
     end

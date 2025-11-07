@@ -4,6 +4,7 @@ function loadScreen(num, offset, bgFrames, fgFrames)
         positive = {},
         negative = {},
         water = {},
+        rope = {},
         obstacles = {}
     }
 
@@ -59,6 +60,8 @@ function loadScreen(num, offset, bgFrames, fgFrames)
                 if b == 1 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=6, y=0}, "spikeRight")) end
                 if b == 2 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=7, y=0}, "spikeBottom")) end
                 if b == 3 then table.insert(scr.obstacles, mapObject:new(xpos, ypos, {x=8, y=0}, "spikeLeft")) end
+            elseif r == 255 and g == 128 and b == 0 then
+                table.insert(scr.rope, mapObject:new(xpos, ypos, {x=9, y=0}, "rope"))
             end
         end
     end

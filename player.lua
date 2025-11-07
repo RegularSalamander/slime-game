@@ -20,6 +20,7 @@ function player:init()
 
     self.climbTime = 0
     self.climbFrame = 0
+    self.ropeFrame = 0
 
     self.bouncing = false
     self.bounceFrame = 0
@@ -33,6 +34,7 @@ function player:init()
     self.wallTester = pointcollider:new(self.pos.x - 1, self.pos.y + PLAYER_HEIGHT/2)
     self.groundTester = linecollider:new(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1, self.pos.x + PLAYER_WIDTH - 1, self.pos.y + PLAYER_HEIGHT + 1)
     self.waterTester = linecollider:new(self.pos.x, self.pos.y + PLAYER_HEIGHT/2, self.pos.x + PLAYER_WIDTH, self.pos.y + PLAYER_HEIGHT/2 - 1)
+    self.ropeTester = rectcollider:new(self.pos.x + 3, self.pos.y, 1, PLAYER_HEIGHT)
 end
 
 function player:update()
@@ -53,6 +55,12 @@ function player:update()
     self.onwall = gameMap:collide(self.wallTester).wall and (self.prevonwall or self.vel.y >= 0 or self.inwater)
     self.previnwater = self.inwater
     self.inwater = gameMap:collide(self.waterTester).water
+    self.onrope = gameMap:collide(self.ropeTester).rope
+
+    if self.onrope then
+        self:ropeUpdate()
+        return
+    end
 
     self.coyoteGround = self.coyoteGround + 1
     self.coyoteWall = self.coyoteWall + 1
@@ -408,11 +416,68 @@ function player:mantleUpdate()
     end
 end
 
+function player:ropeUpdate()
+    self.vel.x = 0
+    self.climbTime = 0
+
+    local leftRightMove = 0
+    if controls.right > 0 then leftRightMove = leftRightMove + 1 end
+    if controls.left > 0 then leftRightMove = leftRightMove - 1 end
+
+    local upDownMove = 0
+    if controls.down > 0 then upDownMove = upDownMove + 1 end
+    if controls.up > 0 then upDownMove = upDownMove - 1 end
+
+    if leftRightMove ~= 0 and controls.z == 1 then
+        self.vel.x = PLAYER_CLIMB_JUMP_VEL_X * leftRightMove
+        self.vel.y = -PLAYER_CLIMB_JUMP_VEL_Y
+        self.pos.x = self.pos.x + 2 * leftRightMove
+        self:move()
+        self.onrope = false
+        return
+    end
+
+    if upDownMove > 0 then
+        self.vel.y = approach(self.vel.y, PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
+    elseif upDownMove < 0 then
+        self.vel.y = approach(self.vel.y, -PLAYER_MAX_CLIMB_VEL, PLAYER_CLIMB_ACCEL)
+    else
+        self.vel.y = approach(self.vel.y, 0, PLAYER_CLIMB_DECEL)
+    end
+
+    local target = self.pos.y + self.vel.y
+    while self.pos.y ~= target do
+        self.pos.y = approach(self.pos.y, target, 1)
+        self:move()
+        local col = gameMap:collide(self.collider)
+        if col.wall then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            self.vel.y = 0
+            break
+        end
+        if col.obstacle then
+            self.pos.y = self.pos.y - sign(self.vel.y)
+            self:sendX(col.sendDir.x)
+            self:sendY(col.sendDir.y)
+            self.bouncing = true
+            break
+        end
+    end
+
+    self:move()
+    local col = gameMap:collide(self.collider)
+    if col.wall then
+        self.pos.y = self.pos.y + 2
+        self:move()
+    end
+end
+
 function player:move()
     self.collider:move(self.pos.x, self.pos.y)
     self.wallTester:move(self.pos.x + PLAYER_WIDTH/2 + PLAYER_WIDTH/2*self.dir + self.dir, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
     self.groundTester:move(self.pos.x + 1, self.pos.y + PLAYER_HEIGHT + 1)
     self.waterTester:move(self.pos.x, self.pos.y + PLAYER_HEIGHT/2 + 0.5)
+    self.ropeTester:move(self.pos.x + 3, self.pos.y)
 end
 
 function player:sendX(vel)
@@ -443,6 +508,19 @@ function player:draw()
         if self.bounceFrame < 0 then self.bounceFrame = self.bounceFrame + 8 end
         quadx = 4
         quady = math.floor(self.bounceFrame)
+    elseif self.onrope then
+        self.ropeFrame = self.ropeFrame + 1/PLAYER_ROPE_FRAMES
+        if self.ropeFrame >= 4 then self.ropeFrame = self.ropeFrame - 4 end
+        if self.vel.y < -PLAYER_MAX_CLIMB_VEL/2 then
+            quadx = math.floor(self.ropeFrame)
+            quady = 7
+        elseif self.vel.y > PLAYER_MAX_CLIMB_VEL/2 then
+            quady = 8
+            quadx = math.floor(self.ropeFrame)
+        else
+            quadx = 4
+            quady = 8
+        end
     elseif self.onground then
         --walk
         quady = 0
@@ -509,5 +587,7 @@ function player:draw()
         self.groundTester:draw()
         if self.inwater then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
         self.waterTester:draw()
+        if self.onrope then love.graphics.setColor(1, 0, 0, 1) else love.graphics.setColor(1, 1, 1, 1) end
+        self.ropeTester:draw()
     end
 end
