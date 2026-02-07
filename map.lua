@@ -4,16 +4,17 @@ function map:init()
     self.screens = {}
     self.currentScreen = 1 --current screen is the screen the player is on, we still have to load adjacent screens
 
-    self.screens[1] = loadScreen(1, 0, 3, 1)
-    self.screens[2] = loadScreen(2, 1)
-    self.screens[3] = loadScreen(3, 2)
-    self.screens[4] = loadScreen(4, 3)
-    self.screens[5] = loadScreen(5, 4)
-    self.screens[6] = loadScreen(6, 5)
-    self.screens[7] = loadScreen(7, 6)
-
     self.sideLeft = linecollider:new(0, 1000, 0, -100000)
     self.sideRight = linecollider:new(128, 1000, 128, -100000)
+
+    self.screens[1] = loadScreen(1, 0, 4, 1)
+    self.screens[2] = loadScreen(2, 1, 1)
+    self.screens[3] = loadScreen(3, 2, 1)
+    self.screens[4] = loadScreen(4, 3, 1)
+    self.screens[5] = loadScreen(5, 4, 1)
+    self.screens[6] = loadScreen(6, 5, 1)
+    self.screens[7] = loadScreen(7, 6, 1)
+    self.screens[8] = loadScreen(8, 7, 1)
 end
 
 function map:collide(other)
